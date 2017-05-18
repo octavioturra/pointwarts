@@ -3,10 +3,6 @@
 Please report any bugs to nicomwaks@gmail.com
 
 i have added console.log on line 48
-
-
-
-
  */
 'use strict'
 
@@ -14,7 +10,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
 const app = express()
-import { token, verifyToken } from './config';
 
 app.set('port', (process.env.PORT || 5000))
 
