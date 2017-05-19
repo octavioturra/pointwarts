@@ -88,6 +88,8 @@ var google = require('googleapis');
 var sheets = google.sheets('v4');
 
 const sendPoints = (sender, receiver, points, context, reason) => authorize().then(function(authClient) {
+	console.log('sendpoints', sender, receiver, points, context, reason);
+
   var request = {
     // The ID of the spreadsheet to update.
     spreadsheetId: '1TY8iJeW496RRrPFwI8lfB5XHMxcFvbjsOrvIZ1YMq1s',  // TODO: Update placeholder value.
@@ -295,7 +297,7 @@ function getFacebookUserData(fbId) {
 			access_token: FB_PAGE_ACCESS_TOKEN,
 			fields: 'first_name,last_name,gender,profile_pic'
 		}
-	}, (error, response) => error ? reject(error) : resolve(response.body)));
+	}, (error, response) => console.log('getfacebookdata') || error ? reject(error) : resolve(response.body)));
 }
 
 function sendGenericMessage(sender) {
