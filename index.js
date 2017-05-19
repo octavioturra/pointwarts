@@ -293,7 +293,7 @@ function sendTextMessage(sender, text) {
 
 function getFacebookUserData(fbId) {
 	return new Promise((resolve, reject) => request({
-		url: `https://graph.facebook.com/v2.6/${id}`,
+		url: `https://graph.facebook.com/v2.6/${fbId}`,
 		qs: {
 			access_token: FB_PAGE_ACCESS_TOKEN,
 			fields: 'first_name,last_name,gender,profile_pic'
