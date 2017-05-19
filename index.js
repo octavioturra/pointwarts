@@ -72,7 +72,7 @@ const actions = {
 	  const {number, context, contact, reason} = entities;
 	return getFacebookUserData(ctx.id)
 	.then(data => sendPoints(data.first_name, extractFromWIT(contact), extractFromWIT(number), extractFromWIT(context), extractFromWIT(reason)))
-	.then(spreadsheet => new Promise((resolve, reject) => spreadsheet.updates.updatedRows ? resolve(ontext) : reject({ err: 'no update' })));
+	.then(spreadsheet => new Promise((resolve, reject) => spreadsheet.updates.updatedRows ? resolve(context) : reject({ err: 'no update' })));
   }
 };
 
