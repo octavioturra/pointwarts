@@ -23,11 +23,11 @@ const WIT_TOKEN = process.env.WIT_TOKEN;
 // sessionId -> {fbid: facebookUserId, context: sessionState}
 const sessions = {};
 
-const findOrCreateSession = (fbid) => {
+const findOrCreateSession = ({id, name}) => {
   let sessionId;
   // Let's see if we already have a session for the user fbid
   Object.keys(sessions).forEach(k => {
-    if (sessions[k].fbid === fbid) {
+    if (sessions[k].fbid === id) {
       // Yep, got it!
       sessionId = k;
     }
@@ -35,7 +35,7 @@ const findOrCreateSession = (fbid) => {
   if (!sessionId) {
     // No session found for user fbid, let's create a new one
     sessionId = new Date().toISOString();
-    sessions[sessionId] = {fbid: fbid, context: {}};
+    sessions[sessionId] = {fbid: fbid, context: { name: name.first_name }};
   }
   return sessionId;
 };
@@ -68,6 +68,10 @@ const actions = {
   },
   // You should implement your custom actions here
   // See https://wit.ai/docs/quickstart
+  sendPoints({sessionId, context, text, entities}) {
+	  return sendPoints(context.name, entities['wit/contact'].value, entities['wit/number'].value, entities.context.value, entities.reason.number, context)
+	  .then(response => new Promise((resolve, reject) => response.updates.updatedRows ? resolve(ontext) : reject({ err: 'no update' })));
+  }
 };
 
 const wit = new Wit({
@@ -75,6 +79,78 @@ const wit = new Wit({
   actions,
   logger: new log.Logger(log.INFO)
 });
+
+// ----------------------------------------------------------------------------
+// Google spreadsheets
+
+var google = require('googleapis');
+var sheets = google.sheets('v4');
+
+const sendPoints = (sender, receiver, points, context, reason) => authorize().then(function(authClient) {
+  var request = {
+    // The ID of the spreadsheet to update.
+    spreadsheetId: '1TY8iJeW496RRrPFwI8lfB5XHMxcFvbjsOrvIZ1YMq1s',  // TODO: Update placeholder value.
+
+    // The A1 notation of a range to search for a logical table of data.
+    // Values will be appended after the last row of the table.
+    range: 'b1:f9999',  // TODO: Update placeholder value.
+
+    // How the input data should be interpreted.
+    valueInputOption: 'RAW',  // TODO: Update placeholder value.
+
+    resource: {
+      values: [
+		  [new Date(), sender, receiver, points, context, reason]
+	  ]
+    },
+
+    auth: authClient
+  };
+
+  return new Promise((resolve, reject) => {
+	sheets.spreadsheets.values.append(request, function(err, response) {
+		if (err) {
+		console.log(err);
+		reject(err);
+		return;
+		}
+
+		// TODO: Change code below to process the `response` object:
+		console.log(JSON.stringify(response, null, 2));
+		resolve(response);
+	});
+  });
+});
+
+const GoogleAuth = require('google-auth-library');
+
+function authorize() {
+  // TODO: Change placeholder below to generate authentication credentials. See
+  // https://developers.google.com/sheets/quickstart/nodejs#step_3_set_up_the_sample
+  //
+  // Authorize using one of the following scopes:
+  //   'https://www.googleapis.com/auth/drive'
+  //   'https://www.googleapis.com/auth/spreadsheets'
+  return new Promise(resolve => {
+	const { private_key, client_email } = JSON.parse(process.env.GOOGLE_AUTH);
+
+	console.log(private_key, client_email);
+
+	const authFactory = new GoogleAuth();
+	const jwtClient = new authFactory.JWT(
+		client_email.trim(), // defined in Heroku
+		null,
+		private_key, // defined in Heroku
+		['https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/spreadsheets']
+	);
+
+	jwtClient.authorize(() => resolve(jwtClient));
+  });
+}
+
+
+// ----------------------------------------------------------------------------
+// Server
 
 app.set('port', (process.env.PORT || 5000))
 
@@ -88,6 +164,10 @@ app.use(bodyParser.json())
 app.get('/', function (req, res) {
 	res.send('hello world i am a secret bot')
 })
+
+app.get('/test-spreadsheet', (req, res) => {
+	sendPoints(1, 2, 3, 4, 5).then((d) => res.send(d));
+});
 
 // for facebook verification
 app.get('/webhook/', function (req, res) {
@@ -132,7 +212,7 @@ app.post('/webhook', (req, res) => {
         if (event.message && !event.message.is_echo) {
           // Yay! We got a new message!
           // We retrieve the Facebook user ID of the sender
-          const sender = event.sender.id;
+          const sender = event.sender;
 
           // We retrieve the user's current session, or create one if it doesn't exist
           // This is needed for our bot to figure out the conversation history
