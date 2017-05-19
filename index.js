@@ -35,7 +35,7 @@ const findOrCreateSession = ({id, name}) => {
   if (!sessionId) {
     // No session found for user fbid, let's create a new one
     sessionId = new Date().toISOString();
-    sessions[sessionId] = {fbid: fbid, context: { name: name.first_name }};
+    sessions[sessionId] = {fbid: id, context: { name: name.first_name }};
   }
   return sessionId;
 };
@@ -133,8 +133,6 @@ function authorize() {
   //   'https://www.googleapis.com/auth/spreadsheets'
   return new Promise(resolve => {
 	const { private_key, client_email } = JSON.parse(process.env.GOOGLE_AUTH);
-
-	console.log(private_key, client_email);
 
 	const authFactory = new GoogleAuth();
 	const jwtClient = new authFactory.JWT(
