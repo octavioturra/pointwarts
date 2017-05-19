@@ -301,7 +301,8 @@ function getFacebookUserData(fbId) {
 		qs: {
 			access_token: process.env.FB_PAGE_TOKEN,
 			fields: 'first_name'
-		}
+		},
+		json: true
 	}, (error, response) => console.log('getfacebookdata', response.body) || error ? reject(error) : resolve(response.body)));
 }
 
