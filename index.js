@@ -23,7 +23,7 @@ const WIT_TOKEN = process.env.WIT_TOKEN;
 // sessionId -> {fbid: facebookUserId, context: sessionState}
 const sessions = {};
 
-const findOrCreateSession = ({id, name}) => {
+const findOrCreateSession = ({id}) => {
   let sessionId;
   // Let's see if we already have a session for the user fbid
   Object.keys(sessions).forEach(k => {
@@ -35,7 +35,7 @@ const findOrCreateSession = ({id, name}) => {
   if (!sessionId) {
     // No session found for user fbid, let's create a new one
     sessionId = new Date().toISOString();
-    sessions[sessionId] = {fbid: id, context: { name: name.first_name }};
+    sessions[sessionId] = {fbid: id, context: { id }};
   }
   return sessionId;
 };
@@ -69,8 +69,9 @@ const actions = {
   // You should implement your custom actions here
   // See https://wit.ai/docs/quickstart
   sendPoints({sessionId, context, text, entities}) {
-	  return sendPoints(context.name, entities['wit/contact'].value, entities['wit/number'].value, entities.context.value, entities.reason.number, context)
-	  .then(response => new Promise((resolve, reject) => response.updates.updatedRows ? resolve(ontext) : reject({ err: 'no update' })));
+	return getFacebookUserData(context.id)
+	.then(data => sendPoints(data.first_name, entities['wit/contact'].value, entities['wit/number'].value, entities.context.value, entities.reason.number, context))
+	.then(spreadsheet => new Promise((resolve, reject) => response.updates.updatedRows ? resolve(ontext) : reject({ err: 'no update' })));
   }
 };
 
@@ -285,6 +286,16 @@ function sendTextMessage(sender, text) {
 			console.log('Error: ', response.body.error)
 		}
 	})
+}
+
+function getFacebookUserData(fbId) {
+	return new Promise((resolve, reject) => request({
+		url: `https://graph.facebook.com/v2.6/${id}`,
+		qs: {
+			access_token: FB_PAGE_ACCESS_TOKEN,
+			fields: 'first_name,last_name,gender,profile_pic'
+		}
+	}, (error, response) => error ? reject(error) : resolve(response.body)));
 }
 
 function sendGenericMessage(sender) {
