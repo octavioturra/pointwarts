@@ -297,9 +297,9 @@ function sendTextMessage(sender, text) {
 
 function getFacebookUserData(fbId) {
 	return new Promise((resolve, reject) => request({
-		url: `https://graph.facebook.com/v2.6/${fbId}`,
+		url: `https://graph.facebook.com/v2.9/${fbId}`,
 		qs: {
-			access_token: process.env.FB_PAGE_ACCESS_TOKEN,
+			access_token: process.env.FB_PAGE_TOKEN,
 			fields: 'first_name'
 		}
 	}, (error, response) => console.log('getfacebookdata', response.body) || error ? reject(error) : resolve(response.body)));
