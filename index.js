@@ -295,7 +295,7 @@ function getFacebookUserData(fbId) {
 	return new Promise((resolve, reject) => request({
 		url: `https://graph.facebook.com/v2.6/${fbId}`,
 		qs: {
-			access_token: FB_PAGE_ACCESS_TOKEN,
+			access_token: process.env.FB_PAGE_ACCESS_TOKEN,
 			fields: 'first_name,last_name,gender,profile_pic'
 		}
 	}, (error, response) => console.log('getfacebookdata') || error ? reject(error) : resolve(response.body)));
