@@ -70,12 +70,13 @@ const actions = {
   // See https://wit.ai/docs/quickstart
   sendPoints({sessionId, context : ctx, entities}) {
 	  const {number, context, contact, reason} = entities;
-	  console.log('entities', entities);
 	return getFacebookUserData(ctx.id)
-	.then(data => sendPoints(data.first_name, contact, number, context, reason))
+	.then(data => sendPoints(data.first_name, extractFromWIT(contact), extractFromWIT(number), extractFromWIT(context), extractFromWIT(reason)))
 	.then(spreadsheet => new Promise((resolve, reject) => response.updates.updatedRows ? resolve(ontext) : reject({ err: 'no update' })));
   }
 };
+
+const extractFromWIT = (prop, index = 0) => prop && prop.length && prop[index] && prop[index].value;
 
 const wit = new Wit({
   accessToken: WIT_TOKEN,
@@ -90,7 +91,7 @@ var google = require('googleapis');
 var sheets = google.sheets('v4');
 
 const sendPoints = (sender, receiver, points, context, reason) => authorize().then(function(authClient) {
-	console.log('sendpoints', sender, receiver.value, points.value, context && context.value, reason && reason.value);
+	console.log('sendpoints', sender, receiver, points, context, reason);
 
   var request = {
     // The ID of the spreadsheet to update.
