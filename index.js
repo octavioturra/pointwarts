@@ -68,9 +68,9 @@ const actions = {
   },
   // You should implement your custom actions here
   // See https://wit.ai/docs/quickstart
-  sendPoints({sessionId, entities}) {
+  sendPoints({sessionId, context : ctx, entities}) {
 	  const {number, context, contact, reason} = entities;
-	return getFacebookUserData(context.id)
+	return getFacebookUserData(ctx.id)
 	.then(data => sendPoints(data.first_name, contact, number, context, reason))
 	.then(spreadsheet => new Promise((resolve, reject) => response.updates.updatedRows ? resolve(ontext) : reject({ err: 'no update' })));
   }
