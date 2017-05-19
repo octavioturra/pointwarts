@@ -89,7 +89,7 @@ var google = require('googleapis');
 var sheets = google.sheets('v4');
 
 const sendPoints = (sender, receiver, points, context, reason) => authorize().then(function(authClient) {
-	console.log('sendpoints', sender, receiver, points, context, reason);
+	console.log('sendpoints', sender, receiver.value, points.value, context && context.value, reason && reason.value);
 
   var request = {
     // The ID of the spreadsheet to update.
@@ -140,7 +140,7 @@ function authorize() {
 
 	const authFactory = new GoogleAuth();
 	const jwtClient = new authFactory.JWT(
-		client_email.trim(), // defined in Heroku
+		client_email, // defined in Heroku
 		null,
 		private_key, // defined in Heroku
 		['https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/spreadsheets']
@@ -267,6 +267,10 @@ app.post('/webhook', (req, res) => {
   res.sendStatus(200);
 });
 
+app.get('/fbd', (req, res) => {
+	getFacebookUserData('1352952438092065').then(data => res.write(JSON.stringify(data)))
+});
+
 
 // recommended to inject access tokens as environmental variables, e.g.
 // const token = process.env.FB_PAGE_ACCESS_TOKEN
@@ -298,7 +302,7 @@ function getFacebookUserData(fbId) {
 			access_token: process.env.FB_PAGE_ACCESS_TOKEN,
 			fields: 'first_name,last_name,gender,profile_pic'
 		}
-	}, (error, response) => console.log('getfacebookdata') || error ? reject(error) : resolve(response.body)));
+	}, (error, response) => console.log('getfacebookdata', response.body) || error ? reject(error) : resolve(response.body)));
 }
 
 function sendGenericMessage(sender) {
