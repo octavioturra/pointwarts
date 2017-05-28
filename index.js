@@ -210,6 +210,7 @@ const fbMessage = (id, text) => {
 };
 
 
+
 // to post data
 app.post('/webhook', (req, res) => {
   // Parse the Messenger payload
@@ -390,11 +391,20 @@ app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
   res.sendStatus(200);
 });
 
+const tgMessage = (id, text) => new Promise(resolve => {
+  bot.sendMessage(id, text, );
+});
+
 // Listen for any kind of message. There are different kinds of
 // messages.
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
+  console.log(msg);
   const sessionId = findOrCreateSession({id: chatId});
+
+  if (!msg.text.match(/pontos/)) {
+    return;
+  }
 
   const context = {
     sessionId,
@@ -422,7 +432,7 @@ bot.on('message', (msg) => {
     // Updating the user's current session state
     sessions[sessionId].context = context;
     // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(chatId, 'Received your message');
+    // bot.sendMessage(chatId, '');
   })
   .catch((err) => {
     console.error('Oops! Got an error from Wit: ', err.stack || err);
