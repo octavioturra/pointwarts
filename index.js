@@ -392,7 +392,7 @@ app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
 });
 
 const tgMessage = (id, text) => new Promise(resolve => {
-  bot.sendMessage(id, text, );
+  bot.sendMessage(id, text);
 });
 
 // Listen for any kind of message. There are different kinds of
