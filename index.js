@@ -369,7 +369,7 @@ const bot = new TelegramBot(TELEGRAM_TOKEN);
 // See: https://devcenter.heroku.com/articles/dyno-metadata
 const url = process.env.APP_URL || 'https://pointwarts.herokuapp.com:443';
 
-// bot.setWebHook(`${url}/bot${TELEGRAM_TOKEN}`);
+bot.setWebHook(`${url}/bot${TELEGRAM_TOKEN}`);
 
 app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
   console.log('hook call', JSON.stringify(req.body));
