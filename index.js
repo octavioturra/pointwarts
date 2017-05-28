@@ -394,15 +394,17 @@ app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
 // messages.
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
+  const sessionId = findOrCreateSession(msg.chat);
 
   const context = {
+    sessionId,
     from: msg.from,
     origin: 'telegram',
     fbid: msg.from.id
   };
 
   wit.runActions(
-    chatId, // the user's current session
+    sessionId, // the user's current session
     msg.text, // the user's message
     context // the user's current session state
   ).then((context) => {
@@ -418,9 +420,9 @@ bot.on('message', (msg) => {
     // }
 
     // Updating the user's current session state
-    sessions[chatId].context = context;
+    sessions[sessionId].context = context;
     // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(chatId, 'Received your message');
+    bot.sendMessage(sessionId, 'Received your message');
   })
   .catch((err) => {
     console.error('Oops! Got an error from Wit: ', err.stack || err);
