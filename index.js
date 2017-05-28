@@ -12,8 +12,11 @@ const request = require('request')
 const app = express()
 const Wit = require('node-wit').Wit;
 const log = require('node-wit').log;
+const TelegramBot = require('node-telegram-bot-api');
 
 const WIT_TOKEN = process.env.WIT_TOKEN;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
+
 
 // ----------------------------------------------------------------------------
 // Wit.ai bot specific code
@@ -151,6 +154,64 @@ function authorize() {
 	jwtClient.authorize(() => resolve(jwtClient));
   });
 }
+
+// ----------------------------------------------------------------------------
+// Telegram
+const options = {
+  webHook: {
+    // Port to which you should bind is assigned to $PORT variable
+    // See: https://devcenter.heroku.com/articles/dynos#local-environment-variables
+    port: process.env.PORT
+    // you do NOT need to set up certificates since Heroku provides
+    // the SSL certs already (https://<app-name>.herokuapp.com)
+    // Also no need to pass IP because on Heroku you need to bind to 0.0.0.0
+  }
+};
+const bot = new TelegramBot(TELEGRAM_TOKEN, options);
+// Heroku routes from port :443 to $PORT
+// Add URL of your app to env variable or enable Dyno Metadata
+// to get this automatically
+// See: https://devcenter.heroku.com/articles/dyno-metadata
+const url = process.env.APP_URL || 'https://pointwarts.herokuapp.com:443';
+
+bot.setWebHook(`${url}/bot${TELEGRAM_TOKEN}`);
+
+app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+// Listen for any kind of message. There are different kinds of
+// messages.
+bot.on('message', (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, JSON.stringify(msg));
+
+  // wit.runActions(
+  //   sessionId, // the user's current session
+  //   text, // the user's message
+  //   sessions[sessionId].context // the user's current session state
+  // ).then((context) => {
+  //   // Our bot did everything it has to do.
+  //   // Now it's waiting for further messages to proceed.
+  //   console.log('Waiting for next user messages');
+
+  //   // Based on the session state, you might want to reset the session.
+  //   // This depends heavily on the business logic of your bot.
+  //   // Example:
+  //   // if (context['done']) {
+  //   //   delete sessions[sessionId];
+  //   // }
+
+  //   // Updating the user's current session state
+  //   sessions[sessionId].context = context;
+  //   // send a message to the chat acknowledging receipt of their message
+  //   bot.sendMessage(chatId, 'Received your message');
+  // })
+  // .catch((err) => {
+  //   console.error('Oops! Got an error from Wit: ', err.stack || err);
+  // })
+});
 
 
 // ----------------------------------------------------------------------------
