@@ -422,7 +422,7 @@ bot.on('message', (msg) => {
     // Updating the user's current session state
     sessions[sessionId].context = context;
     // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(sessionId, 'Received your message');
+    bot.sendMessage(chatId, 'Received your message');
   })
   .catch((err) => {
     console.error('Oops! Got an error from Wit: ', err.stack || err);
