@@ -397,7 +397,8 @@ bot.on('message', (msg) => {
 
   const context = {
     from: msg.from,
-    origin: 'telegram'
+    origin: 'telegram',
+    fbid: msg.from.id
   };
 
   wit.runActions(
