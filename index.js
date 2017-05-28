@@ -175,7 +175,7 @@ app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
 // messages.
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
-  console.log(msg);
+  console.log('mensagem do bot:', msg);
   bot.sendMessage(chatId, JSON.stringify(msg));
 
   // wit.runActions(
