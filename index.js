@@ -402,7 +402,7 @@ bot.on('message', (msg) => {
 
   wit.runActions(
     chatId, // the user's current session
-    msge.text, // the user's message
+    msg.text, // the user's message
     context // the user's current session state
   ).then((context) => {
     // Our bot did everything it has to do.
