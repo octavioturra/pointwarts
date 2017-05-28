@@ -394,7 +394,7 @@ app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
 // messages.
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
-  const sessionId = findOrCreateSession(msg.chat);
+  const sessionId = findOrCreateSession({id: chatId});
 
   const context = {
     sessionId,
